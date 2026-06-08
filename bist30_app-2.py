@@ -195,7 +195,8 @@ def get_data(ticker, start, end):
     df = yf.download(ticker, start=start, end=end,
                      auto_adjust=True, progress=False)
     if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
+        df.columns = df.columns.droplevel(1)
+    df.columns = [col.strip() for col in df.columns]
     return df.dropna()
 
 def add_indicators(df):
@@ -306,16 +307,76 @@ def run_backtest(df, strategy_col):
 
 
 # ── SIDEBAR ──────────────────────────────────────────────────────────
+# ── BIST30 HİSSE LİSTESİ ────────────────────────────────────────────
+BIST30_HISSELER = {
+    "AKBNK.IS": "Akbank",
+    "AKSEN.IS": "Aksen Enerji",
+    "ARCLK.IS": "Arçelik",
+    "ASELS.IS": "Aselsan",
+    "BIMAS.IS": "BİM Mağazalar",
+    "EKGYO.IS": "Emlak Konut GYO",
+    "ENKAI.IS": "Enka İnşaat",
+    "EREGL.IS": "Ereğli Demir Çelik",
+    "FROTO.IS": "Ford Otosan",
+    "GARAN.IS": "Garanti BBVA",
+    "GUBRF.IS": "Gübre Fabrikaları",
+    "HALKB.IS": "Halkbank",
+    "ISCTR.IS": "İş Bankası",
+    "KCHOL.IS": "Koç Holding",
+    "KOZAA.IS": "Koza Anadolu Metal",
+    "KOZAL.IS": "Koza Altın",
+    "KRDMD.IS": "Kardemir",
+    "MGROS.IS": "Migros",
+    "ODAS.IS": "Odaş Elektrik",
+    "PETKM.IS": "Petkim",
+    "PGSUS.IS": "Pegasus",
+    "SAHOL.IS": "Sabancı Holding",
+    "SASA.IS": "SASA Polyester",
+    "SISE.IS": "Şişe Cam",
+    "TAVHL.IS": "TAV Havalimanları",
+    "TCELL.IS": "Turkcell",
+    "THYAO.IS": "Türk Hava Yolları",
+    "TKFEN.IS": "Tekfen Holding",
+    "TOASO.IS": "Tofaş Oto",
+    "TUPRS.IS": "Tüpraş",
+    "TTKOM.IS": "Türk Telekom",
+    "VAKBN.IS": "Vakıfbank",
+    "YKBNK.IS": "Yapı Kredi",
+    "AEFES.IS": "Anadolu Efes",
+    "CCOLA.IS": "Coca-Cola İçecek",
+}
+
 with st.sidebar:
     st.markdown("## 📊 BIST30 Karar Destek")
     st.markdown("---")
 
     st.markdown("### Hisse & Dönem")
-    ticker = st.text_input(
-        "Hisse kodu",
-        value="SASA.IS",
-        help="SASA.IS · THYAO.IS · AKBNK.IS · GARAN.IS · TUPRS.IS"
+
+    # Arama kutusu
+    search_query = st.text_input(
+        "Hisse ara",
+        value="",
+        placeholder="Örn: T yazınca THYAO, TUPRS...",
+        help="Hisse kodu veya şirket adından arama yap"
     )
+
+    # Filtrele
+    if search_query:
+        filtered = {
+            k: v for k, v in BIST30_HISSELER.items()
+            if search_query.upper() in k or search_query.upper() in v.upper()
+        }
+    else:
+        filtered = BIST30_HISSELER
+
+    if filtered:
+        secenekler = [f"{k} — {v}" for k, v in filtered.items()]
+        secim = st.selectbox("Hisse seç", secenekler)
+        ticker = secim.split(" — ")[0]
+        st.caption(f"Seçili: **{ticker}** — {BIST30_HISSELER.get(ticker, '')}")
+    else:
+        st.warning("Eşleşen hisse bulunamadı.")
+        ticker = "SASA.IS"
     c1, c2 = st.columns(2)
     with c1:
         start_date = st.date_input("Başlangıç", value=pd.to_datetime("2021-01-01"))
