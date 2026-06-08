@@ -309,41 +309,36 @@ def run_backtest(df, strategy_col):
 # ── SIDEBAR ──────────────────────────────────────────────────────────
 # ── BIST30 HİSSE LİSTESİ ────────────────────────────────────────────
 BIST30_HISSELER = {
-    "AKBNK.IS": "Akbank",
-    "AKSEN.IS": "Aksen Enerji",
-    "ARCLK.IS": "Arçelik",
-    "ASELS.IS": "Aselsan",
-    "BIMAS.IS": "BİM Mağazalar",
-    "EKGYO.IS": "Emlak Konut GYO",
-    "ENKAI.IS": "Enka İnşaat",
-    "EREGL.IS": "Ereğli Demir Çelik",
-    "FROTO.IS": "Ford Otosan",
-    "GARAN.IS": "Garanti BBVA",
-    "GUBRF.IS": "Gübre Fabrikaları",
-    "HALKB.IS": "Halkbank",
-    "ISCTR.IS": "İş Bankası",
-    "KCHOL.IS": "Koç Holding",
-    "KOZAA.IS": "Koza Anadolu Metal",
-    "KOZAL.IS": "Koza Altın",
-    "KRDMD.IS": "Kardemir",
-    "MGROS.IS": "Migros",
-    "ODAS.IS": "Odaş Elektrik",
-    "PETKM.IS": "Petkim",
-    "PGSUS.IS": "Pegasus",
-    "SAHOL.IS": "Sabancı Holding",
-    "SASA.IS": "SASA Polyester",
-    "SISE.IS": "Şişe Cam",
-    "TAVHL.IS": "TAV Havalimanları",
-    "TCELL.IS": "Turkcell",
-    "THYAO.IS": "Türk Hava Yolları",
-    "TKFEN.IS": "Tekfen Holding",
-    "TOASO.IS": "Tofaş Oto",
-    "TUPRS.IS": "Tüpraş",
-    "TTKOM.IS": "Türk Telekom",
-    "VAKBN.IS": "Vakıfbank",
-    "YKBNK.IS": "Yapı Kredi",
-    "AEFES.IS": "Anadolu Efes",
-    "CCOLA.IS": "Coca-Cola İçecek",
+    "AEFES.IS":  "Anadolu Efes",
+    "AKBNK.IS":  "Akbank",
+    "ASELS.IS":  "Aselsan",
+    "ASTOR.IS":  "Astor Enerji",
+    "BIMAS.IS":  "BİM Mağazalar",
+    "DSTKF.IS":  "Destek Faktoring",
+    "EKGYO.IS":  "Emlak Konut GYO",
+    "ENKAI.IS":  "Enka İnşaat",
+    "EREGL.IS":  "Ereğli Demir Çelik",
+    "FROTO.IS":  "Ford Otosan",
+    "GARAN.IS":  "Garanti BBVA",
+    "GUBRF.IS":  "Gübre Fabrikaları",
+    "ISCTR.IS":  "İş Bankası",
+    "KCHOL.IS":  "Koç Holding",
+    "KRDMD.IS":  "Kardemir",
+    "MGROS.IS":  "Migros",
+    "PETKM.IS":  "Petkim",
+    "PGSUS.IS":  "Pegasus",
+    "SAHOL.IS":  "Sabancı Holding",
+    "SASA.IS":   "SASA Polyester",
+    "SISE.IS":   "Şişe Cam",
+    "TAVHL.IS":  "TAV Havalimanları",
+    "TCELL.IS":  "Turkcell",
+    "THYAO.IS":  "Türk Hava Yolları",
+    "TOASO.IS":  "Tofaş Oto",
+    "TRALT.IS":  "Türkiye Alüminyum",
+    "TTKOM.IS":  "Türk Telekom",
+    "TUPRS.IS":  "Tüpraş",
+    "VAKBN.IS":  "Vakıfbank",
+    "YKBNK.IS":  "Yapı Kredi",
 }
 
 with st.sidebar:
@@ -375,8 +370,12 @@ with st.sidebar:
         ticker = secim.split(" — ")[0]
         st.caption(f"Seçili: **{ticker}** — {BIST30_HISSELER.get(ticker, '')}")
     else:
-        st.warning("Eşleşen hisse bulunamadı.")
-        ticker = "SASA.IS"
+        # Listede yoksa kullanıcının yazdığını direkt ticker olarak kullan
+        manual = search_query.strip().upper()
+        if not manual.endswith(".IS"):
+            manual = manual + ".IS"
+        ticker = manual
+        st.info(f"'{ticker}' listede yok — direkt Yahoo Finance'den çekilecek.")
     c1, c2 = st.columns(2)
     with c1:
         start_date = st.date_input("Başlangıç", value=pd.to_datetime("2021-01-01"))
